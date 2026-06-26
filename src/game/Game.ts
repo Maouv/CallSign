@@ -43,7 +43,7 @@ export class Game {
   private readonly hud = new Hud();
   private readonly loop: Loop;
 
-  constructor(private readonly canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement) {
     this.renderer = createRenderer(canvas);
     this.renderer.shadowMap.enabled = false;
 

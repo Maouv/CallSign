@@ -2,7 +2,7 @@
 export const DISPLAY = {
   speed: { cruise: 480, min: 280 },       // knots
   altitude: { cruise: 15000, max: 45000 }, // feet
-} as const;
+};
 
 // WORLD — pure feel-tuning
 export const WORLD = {
@@ -14,4 +14,4 @@ export const WORLD = {
   maxBank: 1.2,        // radians (~69°)
   maxPitch: 0.5,       // radians (~28°)
   turnFactor: 0.8,     // bank → yaw rate
-} as const;
+};
