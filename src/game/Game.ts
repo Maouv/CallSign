@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { InputController } from '../core/InputController';
 import { Loop } from '../core/Loop';
 import { createRenderer, resizeRenderer } from '../core/Renderer';
+import { FlightModel } from '../systems/FlightModel';
 
 // ponytail: sky + camera inline in Game. Split when it grows.
 
@@ -35,17 +36,12 @@ export class Game {
   private readonly scene = new THREE.Scene();
   private readonly camera = new THREE.PerspectiveCamera(60, 1, 0.1, 2000);
   private readonly input: InputController;
+  private readonly flight = new FlightModel();
   private readonly loop: Loop;
-
-  // camera attitude — smooth lerped toward input
-  private pitch = 0;
-  private roll = 0;
-  private targetPitch = 0;
-  private targetRoll = 0;
 
   constructor(private readonly canvas: HTMLCanvasElement) {
     this.renderer = createRenderer(canvas);
-    this.renderer.shadowMap.enabled = false; // ponytail: no shadows for sky-only scene
+    this.renderer.shadowMap.enabled = false;
 
     this.input = new InputController(canvas);
     this.camera.position.set(0, 0, 0);
@@ -64,27 +60,25 @@ export class Game {
   private update(delta: number): void {
     resizeRenderer(this.renderer, this.camera);
 
-    // input → target attitude
-    this.targetPitch = this.input.pitchIntent * 0.5;  // max ~28°
-    this.targetRoll = this.input.rollIntent * 1.2;    // max ~69°
+    // input → flight model → camera
+    this.flight.update(delta, this.input.pitchIntent, this.input.rollIntent);
     this.input.decay();
 
-    // smooth lerp toward target
-    const lerp = 1 - Math.exp(-delta / 0.15);
-    this.pitch += (this.targetPitch - this.pitch) * lerp;
-    this.roll += (this.targetRoll - this.roll) * lerp;
-
-    // apply to camera quaternion: roll first (Z), then pitch (X)
+    // apply flight attitude to camera: yaw(Y) → pitch(X) → roll(Z)
     const q = new THREE.Quaternion();
-    q.setFromEuler(new THREE.Euler(this.pitch, 0, this.roll, 'ZYX'));
+    q.setFromEuler(new THREE.Euler(this.flight.pitch, this.flight.yaw, this.flight.roll, 'YXZ'));
     this.camera.quaternion.copy(q);
 
     // diagnostics
     (window as any).__CALLSIGN_DIAG__ = {
-      pitch: this.pitch,
-      roll: this.roll,
-      pitchIntent: this.input.pitchIntent,
-      rollIntent: this.input.rollIntent,
+      pitch: this.flight.pitch,
+      roll: this.flight.roll,
+      yaw: this.flight.yaw,
+      heading: this.flight.headingDeg,
+      altitude: this.flight.altitude,
+      speed: this.flight.speed,
+      gForce: this.flight.gForce,
+      worldZ: this.flight.worldZ,
     };
   }
 
