@@ -4,6 +4,7 @@ import { Loop } from '../core/Loop';
 import { createRenderer, resizeRenderer } from '../core/Renderer';
 import { FlightModel } from '../systems/FlightModel';
 import { Terrain } from '../systems/Terrain';
+import { Hud, type FlightState } from '../systems/Hud';
 
 // ponytail: sky + camera inline in Game. Split when it grows.
 
@@ -39,6 +40,7 @@ export class Game {
   private readonly input: InputController;
   private readonly flight = new FlightModel();
   private readonly terrain = new Terrain();
+  private readonly hud = new Hud();
   private readonly loop: Loop;
 
   constructor(private readonly canvas: HTMLCanvasElement) {
@@ -76,6 +78,17 @@ export class Game {
     // terrain scroll — worldX from sideways yaw drift
     const worldX = this.flight.worldZ * Math.sin(this.flight.yaw);
     this.terrain.update(worldX, this.flight.worldZ);
+
+    // HUD update
+    const fs: FlightState = {
+      pitch: this.flight.pitch,
+      roll: this.flight.roll,
+      headingDeg: this.flight.headingDeg,
+      speed: this.flight.speed,
+      altitude: this.flight.altitude,
+      gForce: this.flight.gForce,
+    };
+    this.hud.update(fs);
 
     // diagnostics
     (window as any).__CALLSIGN_DIAG__ = {
