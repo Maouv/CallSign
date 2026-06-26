@@ -20,12 +20,16 @@ const SKY_FRAG = /* glsl */ `
   varying vec3 vDir;
   void main() {
     float h = vDir.y;
-    vec3 top = vec3(0.04, 0.04, 0.10);
+    vec3 top = vec3(0.02, 0.02, 0.08);
+    vec3 mid = vec3(0.05, 0.04, 0.12);
     vec3 horizon = vec3(1.0, 0.42, 0.10);
     vec3 below = vec3(0.23, 0.17, 0.10);
     vec3 color;
     if (h > 0.0) {
-      color = mix(horizon, top, pow(h, 0.4));
+      // FIX 4: dark blue dominates, orange only near horizon
+      float t = smoothstep(0.0, 0.25, h);
+      color = mix(horizon, mid, t);
+      color = mix(color, top, smoothstep(0.15, 0.6, h));
     } else {
       color = mix(horizon, below, pow(-h, 0.6));
     }
@@ -41,6 +45,7 @@ export class Game {
   private readonly flight = new FlightModel();
   private readonly terrain = new Terrain();
   private readonly hud = new Hud();
+  private readonly gOverlay = document.querySelector<HTMLElement>('#g-overlay');
   private readonly loop: Loop;
 
   constructor(canvas: HTMLCanvasElement) {
@@ -95,10 +100,9 @@ export class Game {
     };
     this.hud.update(fs);
 
-    // G-force darkening overlay
-    const gOverlay = document.querySelector('#g-overlay');
-    if (gOverlay) {
-      (gOverlay as HTMLElement).style.opacity = String(Math.max(0, (this.flight.gForce - 3) * 0.15));
+    // G-force darkening overlay — cached ref, no per-frame query
+    if (this.gOverlay) {
+      this.gOverlay.style.opacity = String(Math.max(0, (this.flight.gForce - 3) * 0.15));
     }
 
     // diagnostics
@@ -115,7 +119,8 @@ export class Game {
   }
 
   private createSky(): void {
-    const geo = new THREE.SphereGeometry(500, 32, 32);
+    // ponytail: 16 segments — sky is a smooth gradient, no detail needed
+    const geo = new THREE.SphereGeometry(500, 16, 16);
     const mat = new THREE.ShaderMaterial({
       vertexShader: SKY_VERT,
       fragmentShader: SKY_FRAG,

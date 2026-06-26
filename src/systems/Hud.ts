@@ -90,10 +90,10 @@ export class Hud {
     let html = '';
     for (let kts = 280; kts <= 680; kts += 20) {
       const y = 300 - (kts - 480) * SPEED_PX_PER_KNOT;
-      html += `<line x1="150" y1="${y}" x2="170" y2="${y}" stroke="#39FF14" stroke-width="1.5"/>`;
-      html += `<text x="145" y="${y + 4}" fill="#39FF14" font-size="11" text-anchor="end">${kts}</text>`;
+      html += `<line x1="170" y1="${y}" x2="190" y2="${y}" stroke="#39FF14" stroke-width="1.5"/>`;
+      html += `<text x="165" y="${y + 4}" fill="#39FF14" font-size="11" text-anchor="end">${kts}</text>`;
     }
-    html += `<rect x="148" y="294" width="28" height="12" fill="none" stroke="#39FF14" stroke-width="2"/>`;
+    html += `<rect x="168" y="294" width="28" height="12" fill="none" stroke="#39FF14" stroke-width="2"/>`;
     this.speedLadder.innerHTML = html;
   }
 
@@ -101,10 +101,10 @@ export class Hud {
     let html = '';
     for (let ft = 0; ft <= 45000; ft += 1000) {
       const y = 300 + (ft - 15000) * ALT_PX_PER_FT;
-      html += `<line x1="630" y1="${y}" x2="650" y2="${y}" stroke="#39FF14" stroke-width="1.5"/>`;
-      html += `<text x="655" y="${y + 4}" fill="#39FF14" font-size="11">${(ft/1000).toFixed(0)}</text>`;
+      html += `<line x1="610" y1="${y}" x2="630" y2="${y}" stroke="#39FF14" stroke-width="1.5"/>`;
+      html += `<text x="635" y="${y + 4}" fill="#39FF14" font-size="11">${(ft/1000).toFixed(0)}</text>`;
     }
-    html += `<rect x="624" y="294" width="30" height="12" fill="none" stroke="#39FF14" stroke-width="2"/>`;
+    html += `<rect x="604" y="294" width="30" height="12" fill="none" stroke="#39FF14" stroke-width="2"/>`;
     this.altLadder.innerHTML = html;
   }
 

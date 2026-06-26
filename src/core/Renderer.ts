@@ -1,17 +1,17 @@
 import * as THREE from 'three';
 
 export function createRenderer(canvas: HTMLCanvasElement): THREE.WebGLRenderer {
+  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
   const renderer = new THREE.WebGLRenderer({
     canvas,
-    antialias: true,
+    antialias: !isMobile,  // ponytail: disable AA on mobile — biggest GPU save
     alpha: false,
     powerPreference: 'high-performance',
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.shadowMap.enabled = false;
   return renderer;
 }
 
@@ -23,7 +23,10 @@ export function resizeRenderer(
   const canvas = renderer.domElement;
   const width = Math.max(1, Math.floor(canvas.clientWidth));
   const height = Math.max(1, Math.floor(canvas.clientHeight));
-  const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
+  // ponytail: mobile DPR cap 1.5 — half the pixels, barely visible difference
+  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+  const dprCap = isMobile ? 1.5 : maxDpr;
+  const dpr = Math.min(window.devicePixelRatio || 1, dprCap);
   const bufferWidth = Math.floor(width * dpr);
   const bufferHeight = Math.floor(height * dpr);
   const needsResize = canvas.width !== bufferWidth || canvas.height !== bufferHeight;

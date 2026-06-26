@@ -64,7 +64,8 @@ export class Terrain {
   private readonly mat: THREE.ShaderMaterial;
 
   constructor() {
-    const geo = new THREE.PlaneGeometry(4000, 4000, 256, 256);
+    // ponytail: 64 segments — 16x fewer vertices than 256, GPU noise hides low geo
+    const geo = new THREE.PlaneGeometry(4000, 4000, 64, 64);
     this.mat = new THREE.ShaderMaterial({
       vertexShader: VERT,
       fragmentShader: FRAG,
