@@ -3,6 +3,7 @@ import { InputController } from '../core/InputController';
 import { Loop } from '../core/Loop';
 import { createRenderer, resizeRenderer } from '../core/Renderer';
 import { FlightModel } from '../systems/FlightModel';
+import { Terrain } from '../systems/Terrain';
 
 // ponytail: sky + camera inline in Game. Split when it grows.
 
@@ -37,6 +38,7 @@ export class Game {
   private readonly camera = new THREE.PerspectiveCamera(60, 1, 0.1, 2000);
   private readonly input: InputController;
   private readonly flight = new FlightModel();
+  private readonly terrain = new Terrain();
   private readonly loop: Loop;
 
   constructor(private readonly canvas: HTMLCanvasElement) {
@@ -47,6 +49,8 @@ export class Game {
     this.camera.position.set(0, 0, 0);
 
     this.createSky();
+    this.scene.add(this.terrain.mesh);
+    this.scene.fog = new THREE.Fog(0xff6b1a, 800, 2000);
 
     this.loop = new Loop(
       (delta) => this.update(delta),
@@ -68,6 +72,10 @@ export class Game {
     const q = new THREE.Quaternion();
     q.setFromEuler(new THREE.Euler(this.flight.pitch, this.flight.yaw, this.flight.roll, 'YXZ'));
     this.camera.quaternion.copy(q);
+
+    // terrain scroll — worldX from sideways yaw drift
+    const worldX = this.flight.worldZ * Math.sin(this.flight.yaw);
+    this.terrain.update(worldX, this.flight.worldZ);
 
     // diagnostics
     (window as any).__CALLSIGN_DIAG__ = {
@@ -96,6 +104,7 @@ export class Game {
   dispose(): void {
     this.loop.stop();
     this.input.dispose();
+    this.terrain.dispose();
     this.renderer.dispose();
   }
 }
