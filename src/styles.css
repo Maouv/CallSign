@@ -37,3 +37,32 @@ html, body {
 #hud-svg line, #hud-svg rect, #hud-svg circle, #hud-svg polygon {
   filter: drop-shadow(0 0 2px #39FF14);
 }
+
+#g-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.8) 100%);
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+#rotate-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #000;
+  color: #39FF14;
+  font-family: monospace;
+  font-size: 1.2rem;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+@media (orientation: portrait) and (max-width: 900px) {
+  #rotate-overlay {
+    display: flex;
+  }
+}

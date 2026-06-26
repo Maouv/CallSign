@@ -75,6 +75,11 @@ export class Game {
     q.setFromEuler(new THREE.Euler(this.flight.pitch, this.flight.yaw, this.flight.roll, 'YXZ'));
     this.camera.quaternion.copy(q);
 
+    // subtle head bob + camera shake at high G
+    const shake = Math.max(0, this.flight.gForce - 2) * 0.001;
+    this.camera.position.x = (Math.random() - 0.5) * shake;
+    this.camera.position.y = Math.sin(performance.now() * 0.002) * 0.001;
+
     // terrain scroll — worldX from sideways yaw drift
     const worldX = this.flight.worldZ * Math.sin(this.flight.yaw);
     this.terrain.update(worldX, this.flight.worldZ);
@@ -89,6 +94,12 @@ export class Game {
       gForce: this.flight.gForce,
     };
     this.hud.update(fs);
+
+    // G-force darkening overlay
+    const gOverlay = document.querySelector('#g-overlay');
+    if (gOverlay) {
+      (gOverlay as HTMLElement).style.opacity = String(Math.max(0, (this.flight.gForce - 3) * 0.15));
+    }
 
     // diagnostics
     (window as any).__CALLSIGN_DIAG__ = {
